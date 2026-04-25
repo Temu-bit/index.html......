@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Tavern Keeper</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container" class="tier-1"> <!-- Tiers: tier-1, tier-2, tier-3 -->
+        <!-- Header: Gold Display -->
+        <header id="top-bar">
+            <div class="header-left">
+                <h1 id="tavern-name">Meine Spelunke</h1>
+                <div id="tavern-tier-text">Dreckloch (Tier 1)</div>
+            </div>
+            <div class="header-center">
+                <div class="gold-display">
+                    <span id="gold-icon">🪙</span>
+                    <span id="gold-amount">0</span> Gold
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats-bar">
+                    <div class="gold-per-sec"><span id="gps-amount">0</span> G/s</div>
+                    <div class="gem-display">💎 <span id="gem-amount">0</span></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Tavern Area: Clicker + Visuals -->
+        <main id="tavern-area">
+            <div class="tavern-scene">
+                <!-- Decorative Elements - MODULAR EMOJI ART -->
+                <div id="decor-garden" class="decor-item hidden">
+                    <div class="garden-ground">🍃🍃🍃</div>
+                    <div class="garden-tree">🌲</div>
+                    <div class="garden-flowers">🌻🌷🌻</div>
+                </div>
+
+                <div id="decor-carpet" class="decor-item hidden"></div>
+                
+                <!-- Nature Guest (Elves) -->
+                <div id="garden-guest-area" class="hidden">
+                    <div class="vip-exclamation">!</div>
+                    <div class="vip-thought-bubble">
+                        <span class="bubble-text">Begehre</span>
+                        <span id="garden-request-icon">🌿</span>
+                    </div>
+                    <div id="garden-guest-emoji">🧝‍♀️</div>
+                </div>
+
+                <div id="decor-fireplace" class="decor-item hidden">
+                    <div class="stone-oven">🧱🧱🧱</div>
+                    <div class="logs">🪵🪵</div>
+                    <span class="fire-fx">🔥</span>
+                </div>
+
+                <div id="decor-chandelier" class="decor-item hidden">
+                    <div class="chandelier-rim">
+                        <span class="candle">🕯️</span>
+                        <span class="candle">🕯️</span>
+                        <span class="candle">🕯️</span>
+                        <span class="candle">🕯️</span>
+                    </div>
+                </div>
+                
+                <div id="decor-card-table" class="decor-item hidden">
+                    <div class="table-surface">
+                        <span class="game-dice">🎲</span>
+                        <span class="game-cards">🃏</span>
+                        <span class="game-gold">💰</span>
+                    </div>
+                </div>
+
+                <!-- V.I.P. Lounge -->
+                <div id="decor-lounge" class="decor-item hidden">🛋️✨</div>
+
+                <!-- V.I.P. Guest Container (Active interaction) -->
+                <div id="vip-guest-area" class="hidden">
+                    <div id="vip-exclamation">!</div>
+                    <div id="vip-thought-bubble">
+                        <span class="bubble-text">Ich will</span>
+                        <span id="vip-request-icon">🍯</span>
+                    </div>
+                    <div id="vip-guest-emoji">👑</div>
+                </div>
+
+                <!-- Specialized Dice (owned separately) -->
+                <div id="decor-dice" class="decor-item hidden">🎲🎲</div>
+
+                <!-- Alchemy Lab -->
+                <div id="decor-lab" class="decor-item hidden">
+                    <div class="lab-table">🧪⚗️🫧</div>
+                </div>
+
+                <!-- Active Potion HUD -->
+                <div id="potion-hud"></div>
+
+                <!-- ... -->
+
+                <!-- Event Banner -->
+                <div id="event-banner" class="hidden">
+                    <h3 id="event-title">Event!</h3>
+                    <p id="event-desc">Beschreibung</p>
+                    <span id="event-timer">30.0s</span>
+                </div>
+
+                <!-- Brawl Boss -->
+                <button id="brawl-boss" class="hidden">
+                    <div class="brawl-emoji">👹</div>
+                    <div class="brawl-health">
+                        <div id="brawl-hp-bar"></div>
+                    </div>
+                </button>
+
+                <!-- Floating text container -->
+                <div id="floating-text-container"></div>
+                
+                <!-- Jackpot text -->
+                <div id="jackpot-overlay" class="hidden">JACKPOT!</div>
+                
+                <!-- Drink Selector (Cycle button) -->
+                <div id="top-left-controls">
+                    <button id="help-btn" title="Spielhilfe">?</button>
+                    <button id="open-prestige-btn" title="Reinkarnation (Prestige)" style="width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--wood-light); background: var(--wood-dark); cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; font-size: 2rem;">🌠</button>
+                    <button id="open-wheel-btn" class="hidden" title="Glücksrad" style="width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--gold); background: #800000; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 15px var(--gold); transition: 0.2s; font-size: 1.5rem; position: relative;">
+                        🎰
+                        <div id="wheel-cooldown-timer" style="font-size: 0.6rem; color: #fff; position: absolute; bottom: -20px; background: rgba(0,0,0,0.8); padding: 2px 5px; border-radius: 5px; white-space: nowrap; font-family: monospace;">Bereit!</div>
+                    </button>
+                    <button id="cycle-drink-btn" class="hidden" title="Getränk wechseln">
+                        <span id="active-drink-icon">🍺</span>
+                    </button>
+                </div>
+                
+                <!-- The main click target -->
+                <button id="serve-beer-btn" class="main-clicker">
+                    <div class="tap-structure">
+                        <span class="tap-main">🍺</span>
+                    </div>
+                    <span class="btn-text">Bier zapfen</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Shop -->
+        <aside id="shop-sidebar">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="upgrades">Upgrades</button>
+                <button class="tab-btn" data-tab="decor">Deko</button>
+                <button class="tab-btn" data-tab="games">Spiele</button>
+                <button class="tab-btn" data-tab="drinks">Getränke</button>
+                <button class="tab-btn" data-tab="vip" id="tab-btn-vip">💎 V.I.P.</button>
+                <button class="tab-btn hidden" data-tab="lab" id="tab-btn-lab">🧪 Labor</button>
+            </div>
+
+            <div id="shop-content">
+                <!-- Drink selection UI inside Tavern Area (visible if unlocked) -->
+                <!-- This will be moved to the Tavern Area section in the next chunk -->
+                <!-- LABOR TAB -->
+                <div id="tab-lab" class="shop-tab">
+                    <section class="shop-section">
+                        <h3>Alchemie & Tränke</h3>
+                        <p style="font-size: 0.8rem; margin-bottom: 10px; opacity: 0.8;">Temporäre, mächtige Buffs für 60 Sekunden!</p>
+                        <div class="shop-items">
+                            <button class="shop-item specialty" id="buy-potion-haste">
+                                <div class="item-info">
+                                    <span class="item-name">🧪 Trank der Eile</span>
+                                    <span class="item-desc">Doppeltes Klick-Gold</span>
+                                </div>
+                                <span class="item-cost">50.000</span>
+                            </button>
+                            <button class="shop-item specialty" id="buy-potion-luck">
+                                <div class="item-info">
+                                    <span class="item-name">🧪 Glückselixier</span>
+                                    <span class="item-desc">5x Jackpot-Chance</span>
+                                </div>
+                                <span class="item-cost">150.000</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ... OTHER TABS ... -->
+                <!-- UPGRADES and DECOR TABS ... -->
+                <!-- UPGRADES TAB -->
+                <div id="tab-upgrades" class="shop-tab active">
+                    <section class="shop-section">
+                        <h3>Verbesserungen</h3>
+                        <div class="shop-items">
+                            <button class="shop-item" id="upgrade-beer" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">Besseres Bier</span>
+                                    <span class="item-desc">+1 Gold/Klick</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-beer">10</span></div>
+                            </button>
+                            <button class="shop-item" id="upgrade-mug" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">Größerer Krug</span>
+                                    <span class="item-desc">10% Chance (doppel Gold)</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-mug">100</span></div>
+                            </button>
+                            <!-- NEW: Tavern Level Up -->
+                            <button class="shop-item specialty" id="upgrade-tier" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">Taverne renovieren</span>
+                                    <span class="item-desc">Nächster Rang freischalten</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-tier">500</span></div>
+                            </button>
+                            <button class="shop-item" id="upgrade-tap" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">⚡ Zauberhahn</span>
+                                    <span class="item-desc">+3 Gold pro Klick (stapelbar)</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-tap">500</span></div>
+                            </button>
+                            <button class="shop-item" id="upgrade-rep" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">⭐ Tavernen-Ruf</span>
+                                    <span class="item-desc">+10% passive Gold/s (stapelbar)</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-rep">1000</span></div>
+                            </button>
+                            <button class="shop-item" id="upgrade-luck" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🍀 Glücks-Hufeisen</span>
+                                    <span class="item-desc">+1% Edelstein-Drop-Chance</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-luck">3000</span></div>
+                            </button>
+                            <button class="shop-item" id="upgrade-sign" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🛡️ Türschild</span>
+                                    <span class="item-desc">V.I.P. erscheinen häufiger</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-upgrade-sign">5000</span></div>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="shop-section">
+                        <h3>Begleiter</h3>
+                        <div class="shop-items">
+                            <button class="shop-item" id="comp-bard" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🎸 Barde</span>
+                                    <span class="item-desc">+1 Gold/Sek</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-bard">50</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-bard">0</span></div>
+                            </button>
+                            <button class="shop-item" id="comp-troll" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🧌 Türsteher-Troll</span>
+                                    <span class="item-desc">+2 Gold/Klick</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-troll">250</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-troll">0</span></div>
+                            </button>
+                            <button class="shop-item" id="comp-cat" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🐈 Zauber-Katze</span>
+                                    <span class="item-desc">Drop-Chance Bonus</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-cat">1000</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-cat">0</span></div>
+                            </button>
+                            <button class="shop-item" id="comp-witch" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🧙‍♀️ Weise Frau</span>
+                                    <span class="item-desc">+5 Gold/Sek passiv</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-witch">5000</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-witch">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="comp-dragon" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🐉 Haustier-Drache</span>
+                                    <span class="item-desc">Jackpot-Gewinn x2</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-dragon">15000</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-dragon">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="comp-chef" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">👨‍🍳 Küchenchef</span>
+                                    <span class="item-desc">+20% Bonus bei V.I.P. Bedienung</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-comp-chef">8000</span></div>
+                                <div class="item-owned">Level: <span id="owned-comp-chef">0</span></div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- DECOR TAB -->
+                <div id="tab-decor" class="shop-tab">
+                    <section class="shop-section">
+                        <h3>Innenausstattung</h3>
+                        <p class="tab-info">Dekoration erhöht deine "Aura" (+Multiplikator)</p>
+                        <div class="shop-items">
+                            <button class="shop-item decor-purchase" id="buy-carpet" data-decor="carpet" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🧧 Bärenfell-Teppich</span>
+                                    <span class="item-desc">+5% Gold Multiplikator</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-carpet">150</span></div>
+                            </button>
+                            <button class="shop-item decor-purchase" id="buy-fireplace" data-decor="fireplace" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🔥 Kamin</span>
+                                    <span class="item-desc">+10% Gold Multiplikator</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-fireplace">400</span></div>
+                            </button>
+                            <button class="shop-item decor-purchase" id="buy-chandelier" data-decor="chandelier" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🕯️ Kronleuchter</span>
+                                    <span class="item-desc">+15% Gold Multiplikator</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-chandelier">1200</span></div>
+                            </button>
+                            <button class="shop-item decor-purchase" id="buy-lounge" data-decor="lounge" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🛋️ V.I.P. Lounge</span>
+                                    <span class="item-desc">Lockt königliche Gäste an</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-lounge">5000</span></div>
+                            </button>
+                            <button class="shop-item decor-purchase" id="buy-garden" data-decor="garden" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🌳 Tavernen-Garten</span>
+                                    <span class="item-desc">+10% Aura & Natur-Gäste</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-garden">15000</span></div>
+                            </button>
+                            <button class="shop-item decor-purchase specialty" id="buy-lab" data-decor="lab" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🧪 Alchemie-Labor</span>
+                                    <span class="item-desc">+25% Aura & Schaltet Tränke-Reiter frei</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-decor-lab">500.000</span></div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- GAMES TAB -->
+                <div id="tab-games" class="shop-tab">
+                    <section class="shop-section">
+                        <h3>Spielecke</h3>
+                        <p class="tab-info">Spiele bringen Risiko-Gewinne und reiche Gäste.</p>
+                        <div class="shop-items">
+                            <button class="shop-item specialty" id="buy-dice" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🎲 Glücks-Würfel</span>
+                                    <span class="item-desc">Chance auf 20x Klick-Gewinn</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-game-dice">300</span></div>
+                                <div class="item-owned">Level: <span id="owned-game-dice">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-card-table" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">♣️ Kartentisch</span>
+                                    <span class="item-desc">+50 passive G/s durch Bonzen</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-game-card-table">2000</span></div>
+                                <div class="item-owned">Level: <span id="owned-game-card-table">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-wheel" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🎰 Glücksrad</span>
+                                    <span class="item-desc">Zufällige Gold-Events (höheres Level = besser)</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-game-wheel">5000</span></div>
+                                <div class="item-owned">Level: <span id="owned-game-wheel">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-poker" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🃏 Poker-Tisch</span>
+                                    <span class="item-desc">+100 passive G/s durch High-Roller</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-game-poker">12000</span></div>
+                                <div class="item-owned">Level: <span id="owned-game-poker">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-dart" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🎯 Dart-Scheibe</span>
+                                    <span class="item-desc">Klick-Combo: 5x schnell = Bonus-Schub</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-game-dart">8000</span></div>
+                                <div class="item-owned">Level: <span id="owned-game-dart">0</span></div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- VIP TAB (GEM SHOP) -->
+                <div id="tab-vip" class="shop-tab">
+                    <section class="shop-section">
+                        <h3>💎 Edelstein-Shop</h3>
+                        <p class="tab-info">Permanente, göttliche Segen für dein Imperium.</p>
+                        <div class="shop-items">
+                            <button class="shop-item specialty" id="buy-gem-multiplier" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">📜 Königliches Dekret</span>
+                                    <span class="item-desc">+50% Gold permanent</span>
+                                </div>
+                                <div class="item-cost">💎 <span id="cost-gem-multiplier">10</span></div>
+                                <div class="item-owned">Level: <span id="owned-gem-multiplier">0</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-gem-attractor" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">✨ Magischer Fokus</span>
+                                    <span class="item-desc">+100% VIP-Erscheinungsrate</span>
+                                </div>
+                                <div class="item-cost">💎 <span id="cost-gem-attractor">25</span></div>
+                                <div class="item-owned">Level: <span id="owned-gem-attractor">0</span></div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- DRINKS TAB -->
+                <div id="tab-drinks" class="shop-tab">
+                    <section class="shop-section">
+                        <h3>Getränkekarte</h3>
+                        <p class="tab-info">Schalte Rezepte frei und wähle sie am Zapfhahn aus.</p>
+                        <div class="shop-items">
+                            <button class="shop-item specialty" id="buy-mead" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🍯 Met-Rezept</span>
+                                    <span class="item-desc">+25% Gold pro Klick</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-drink-mead">500</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-wine" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🌿 Elfenwein-Rezept</span>
+                                    <span class="item-desc">+20% Aura-Multiplikator</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-drink-wine">2500</span></div>
+                            </button>
+                            <button class="shop-item specialty" id="buy-dragon" disabled>
+                                <div class="item-info">
+                                    <span class="item-name">🌋 Drachenbier-Rezept</span>
+                                    <span class="item-desc">Doppelt Jackpot-Chance</span>
+                                </div>
+                                <div class="item-cost">🪙 <span id="cost-drink-dragon">10000</span></div>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Prestige Modal -->
+    <div id="prestige-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center; border-color: #ffd700; background: #2a1b0e; color: #f5deb3;">
+            <button id="close-prestige" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 3rem; cursor: pointer; color: #ffd700;">&times;</button>
+            <h2 style="color: #ffd700; font-size: 2.2rem; margin-bottom: 15px; font-family: 'Cinzel', serif;">🌠 Reinkarnation</h2>
+            
+            <p style="font-size: 1.1rem; margin-bottom: 25px;">Verbrenne deine Taverne und starte neu! Du verlierst alles Gold, Upgrades und Gebäude, aber behältst deine Edelsteine. Jede Seele gibt dauerhaft 150% Aura-Bonus.</p>
+            
+            <div style="background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #5c4033;">
+                <div style="font-size: 1.4rem; color: #ffd700; margin-bottom: 10px;">Deine Tavernen-Seelen: <span id="prestige-points" style="font-weight: bold; font-size: 2rem;">0</span></div>
+                <div style="color: #4caf50; font-weight: bold; font-size: 1.2rem;">Aktueller Bonus: +<span id="prestige-bonus">0</span>% Gesamt-Gold</div>
+            </div>
+
+            <div style="margin-bottom: 25px; font-size: 1rem; color: #aaa;">
+                Benötigtes Gold für die nächste Seele:<br>
+                <span id="prestige-req" style="color: #ffd700; font-weight: bold; font-size: 1.5rem;">1.000.000</span> Gold
+            </div>
+
+            <button class="confirm-btn" id="btn-do-prestige" style="background: #8b0000; border: 3px solid #ffd700; font-size: 1.5rem; padding: 20px; border-radius: 15px; text-shadow: 0 0 10px black; cursor: pointer;">
+                🔥 Taverne niederbrennen!
+            </button>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="close-help">&times;</button>
+            <h2>📜 Tavernen-Handbuch</h2>
+            
+            <div class="help-section">
+                <h3>🪙 Grundlagen</h3>
+                <p>Klicke auf den Zapfhahn (oder Gäste), um Gold zu verdienen. Kaufe im Shop Upgrades und Mitarbeiter (Barden, Trolle), um dein Einkommen zu steigern.</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🍻 Getränke & Zapfhahn</h3>
+                <p>Wähle oben links ein Getränk. Jedes hat eigene Buffs:</p>
+                <ul>
+                    <li>🍯 **Met:** +25% Gold pro Klick</li>
+                    <li>🌿 **Elfenwein:** +20% Aura (Passiv-Bonus)</li>
+                    <li>🌋 **Drachenbier:** Doppelte Jackpot-Chance!</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>👑 V.I.P. & Garten</h3>
+                <p>Gäste mit einem **"!"** haben Wünsche! Schalte oben links auf das gewünschte Getränk und klicke den Gast an. **Tipp:** Elfen im Garten geben mit Elfenwein den 5-fachen Bonus!</p>
+            </div>
+
+            <div class="help-section">
+                <h3>💎 Edelsteine</h3>
+                <p>Sammle Gems von V.I.P. Gästen für permanente, göttliche Upgrades im V.I.P.-Shop-Tab.</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🧪 Alchemielabor</h3>
+                <p>Ab 500.000 Gold kannst du den Labortisch (Deko) kaufen. Dort braust du mächtige Tränke, die kurzzeitig massive Schübe geben. **Achtung:** Sie verfallen nach 60 Sekunden!</p>
+            </div>
+
+            <div class="help-section">
+                <h3>⚡ Ereignisse & Schlägereien</h3>
+                <p>Behalte die Taverne im Auge! Gelegentlich rufen **Zwerge** ein Trinkfest aus (Klick-Gold x2) oder es kommt zur **Schlägerei**. Klicke rasend schnell auf den tobenden Ork (👹), um das Chaos zu beenden und ein lukratives Kopfgeld zu kassieren!</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🎰 Das Schicksalsrad</h3>
+                <p>Schalte das Glücksrad im Spiele-Tab frei! Oben links erscheint ein Slot-Button. Du kannst alle **5 Minuten** kostenlos drehen und fette Jackpots, Edelsteine oder Trank-Boosts gewinnen!</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🌙 Offline-Einkommen</h3>
+                <p>Deine Barden und Mitarbeiter arbeiten auch, wenn du nicht da bist! Wenn du den Browser schließt, sammeln sie Gold für maximal 7 Tage. Komm zurück und kassiere deine Beute!</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🏘️ Tavernen-Stufen</h3>
+                <p>Du kannst deine Taverne jetzt bis **Stufe 10 (Weltenende)** ausbauen. Jede Stufe verändert das Aussehen deiner Schänke massiv und bringt dich näher an den Status einer Legende.</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🌠 Reinkarnation (Prestige)</h3>
+                <p>Klicke oben links auf den Meteorschauer-Button (🌠), um deine Taverne bei enormen Reichtum **niederzubrennen**. Du verlierst alles Gold und Upgrades, behältst aber deine Edelsteine. Jede Tavernen-Seele bringt einen gigantischen, dauerhaften Gold-Bonus!</p>
+            </div>
+            
+            <button class="confirm-btn" id="hide-help">Alles klar!</button>
+        </div>
+    </div>
+
+    <!-- Offline Modal -->
+    <div id="offline-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center; border-color: #4caf50; background: #0f1f0f; color: #f5deb3;">
+            <h2 style="color: #4caf50; font-size: 2.2rem; margin-bottom: 15px;">🌙 Willkommen zurück!</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 25px;">Deine Angestellten haben in deiner Abwesenheit fleißig gearbeitet.</p>
+            
+            <div style="background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #2e7d32;">
+                <div style="color: #aaa; margin-bottom: 5px;">Abwesenheitszeit: <span id="offline-time" style="color: #fff;">0</span></div>
+                <div style="font-size: 1.4rem; color: #ffd700; font-weight: bold;">Verdientes Gold:</div>
+                <div id="offline-gold" style="font-size: 2.5rem; color: #ffd700; text-shadow: 0 0 10px #ff0000;">+0</div>
+            </div>
+
+            <button class="confirm-btn" id="close-offline" style="background: #2e7d32; border: 2px solid #4caf50;">
+                💰 Einstecken!
+            </button>
+        </div>
+    </div>
+
+    <!-- Wheel Modal -->
+    <div id="wheel-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center; border-color: #ffd700; background: #2a1b0e; color: #f5deb3;">
+            <button id="close-wheel" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 3rem; cursor: pointer; color: #ffd700;">&times;</button>
+            <h2 style="color: #ffd700; font-size: 2.2rem; margin-bottom: 5px;">🎡 Das Schicksalsrad</h2>
+            <p style="font-size: 1rem; margin-bottom: 25px; color: #aaa;">Ein kostenloser Dreh alle 5 Minuten!</p>
+            
+            <div style="background: rgba(0,0,0,0.6); padding: 30px; border-radius: 50%; width: 200px; height: 200px; margin: 0 auto 25px auto; border: 10px solid #8b0000; box-shadow: 0 0 30px #ffd700 inset, 0 0 20px #000; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+                <div id="wheel-display" style="font-size: 5rem; text-shadow: 0 0 20px #fff; transition: all 0.1s;">❓</div>
+            </div>
+
+            <div id="wheel-result-text" style="height: 30px; font-size: 1.5rem; font-weight: bold; color: #4caf50; margin-bottom: 15px;"></div>
+
+            <button class="confirm-btn" id="spin-wheel-btn" style="background: #d4af37; border: 3px solid #ffd700; color: #000; font-size: 1.5rem; padding: 15px 30px; border-radius: 10px; cursor: pointer;">
+                🎰 Jetzt Drehen!
+            </button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
